@@ -111,49 +111,133 @@ async function banner(){const width=Math.min(process.stdout.columns||80,100),lin
 const ansiPattern=/\x1b\[[0-9;]*m/g;
 const visibleLength=value=>value.replace(ansiPattern,'').length;
 const centerLine=(value,width)=>' '.repeat(Math.max(0,Math.floor((width-visibleLength(value))/2)))+value;
-function adaptivePortrait(width=80){
- const colorEnabled=process.env.NO_COLOR===undefined;
+const dotPalette={
+ B:[91,164,194],N:[19,24,31],D:[48,53,64],G:[103,108,119],L:[202,203,200],
+ S:[215,169,142],P:[238,193,165],T:[163,113,92],W:[239,239,232],R:[210,20,38],
+ Q:[99,17,29],A:[47,61,83],X:[7,10,13]
+};
+const dotPortraitRows=[
+ 'BBBBNNNNNNNNNNNNNDDDDDDDDDDDDD',
+ 'BBBBNNNNNNNNNNNNNDDDDDDDDDDDDD',
+ 'BBBBNNNNNNNNNNNNNDDDDLLLLLLLLL',
+ 'BBBBNNNNNNNNNNNNNDDDLLLLLLLLLL',
+ 'BBBBNNNNNNNNNNNNNDDDLLLLLLLLLG',
+ 'BBBBNNNNNNNNNNNNNDDDLLLLLLLGGG',
+ 'BBBNNNNNNNNNNNNNNGDDLLLLLLGGDG',
+ 'BBBNNNNNNNNNNNNNNGDDLLLLLGGDDG',
+ 'BBBNNNNNNNNNNNNNNGDDLLLLGGDDGG',
+ 'BBBNNNNNNNNNNNNNNGDDLLLGGDDGGG',
+ 'BBBNNNNNNNNNNNNNGGDDLLGGDDGGGG',
+ 'BBBNNNNNNNNNNNNNGGDDLGGDDGGGGG',
+ 'BBBNNNNNNNNNNNNNDGDDGGDDGGGGGG',
+ 'BBBNNNNNNNNNNNNNAADDDDDDDDDDDD',
+ 'BBBNNNNNNNNNNNNNAAADDDDDDDDDDD',
+ 'BBBNNNNNNNNNNNNNSSSSSSSSSSSSSS',
+ 'BBBNNNNNNNNNNNNNPPPPPPPPPPPPPP',
+ 'BBBNNNNNNNNNNNNNTTSSSSSTTSSSSS',
+ 'BBBNNNNNNNNNNNNNXXXXTTTXXXXSSSS',
+ 'BBBNNNNNNNNNNNNXWWXXRRRXXWWXSSS',
+ 'BBBNNNNNNNNNNNNXWXXRRRRRXXWXSSS',
+ 'BBBNNNNNNNNNNNNXWXXRRRRRXXWXSSS',
+ 'BBBNNNNNNNNNNNNNXWWXXRXXWWXXSSS',
+ 'BBBNNNNNNNNNNNNNNXXXXXXXXXXTSSS',
+ 'BBBNNNNNNNNNNNNNNTTSSSSSSSSSSS',
+ 'BBBNNNNNNNNNNNNNNTSSSSSSSSSSSS',
+ 'BBBNNNNNNNNNNNNNNTSSSSSSSSSSSS',
+ 'BBBNNNNNNNNNNNNNNTSSSSSSSSSSSS',
+ 'BBBNNNNNNNNNNNNNNTTSSSSSSSSSSS',
+ 'BBBNNNNNNNNNNNNNNXTSSSSSSSSSSS',
+ 'BBBBNNNNNNNNNNNNNXTSSSSSSSSSSS',
+ 'BBBBNNNNNNNNNNNNNXTSSSSSSSSSSS',
+ 'BBBBNNNNNNNNNNNNNXXTSSSSSSSSSS',
+ 'BBBBNNNNNNNNNNNNNXXTTSSSSSSSSS',
+ 'BBBBNNNNNNNNNNNNNXXTTTSSSSSSSS',
+ 'BBBBNNNNNNNNNNNNNXXXTTTSSSSSSS',
+ 'BBBBNNNNNNNNNNNNNXXXXTTTTSSSSSS',
+ 'BBBBNNNNNNNNNNNNNXXXXTTTTTSSSSS',
+ 'BBBBNNNNNNNNNNNNNXXXXXTTTTTSSSS',
+ 'BBBBNNNNNNNNNNNNNXXXXXTTTTTTSSS',
+ 'BBBNNNNNQQNNNNNNNXXXXXXTTTTTTSS',
+ 'BBNNNQQQQQNNNNNNNXXXXXXXTTTTTTT',
+ 'BNNNQQQQQQQNNNNNNXXXXXXXXTTTTTT',
+ 'NNNQQQQQQQQNNNNNNXXXXXXXXXTTTTT',
+ 'NNNNQQQQQQQNNNNNNXXXXXXXXXXTTTT',
+ 'NNNNNQQQQQNNNNNNNXXXXXXXXXXXTTT',
+ 'NNNNNNQQQNNNNNNNNXXXXXXXXXXXXTT',
+ 'NNNNNNNNNNNNNNNNNXXXXXXXXXXXXXQ',
+ 'NNNNNNNNNNNNNNNNNXXXXXXXXXXXXXQ',
+ 'NNNNNNNNNNNNNNNNNXXXXXXXXXXXXXQ'
+];
+const portraitGrid=dotPortraitRows.map(line=>[...line.padEnd(30,'N').slice(0,30)].map(key=>dotPalette[key]||dotPalette.N));
+const portraitShape={rows:portraitGrid.length,columns:portraitGrid[0].length};
+const terminalSize=()=>({columns:Math.max(40,Number(process.stdout.columns)||100),rows:Math.max(16,Number(process.stdout.rows)||40)});
+function scaledPortrait(targetRows,targetColumns){
+ const rows=[];
+ for(let row=0;row<targetRows;row+=1){
+  const firstRow=Math.floor(row*portraitShape.rows/targetRows);
+  const lastRow=Math.max(firstRow+1,Math.floor((row+1)*portraitShape.rows/targetRows));
+  let rendered='',active=null;
+  for(let column=0;column<targetColumns;column+=1){
+   const firstColumn=Math.floor(column*portraitShape.columns/targetColumns);
+   const lastColumn=Math.max(firstColumn+1,Math.floor((column+1)*portraitShape.columns/targetColumns));
+   let red=0,green=0,blue=0,samples=0;
+   for(let y=firstRow;y<lastRow;y+=1)for(let x=firstColumn;x<lastColumn;x+=1){const pixel=portraitGrid[y][x];red+=pixel[0];green+=pixel[1];blue+=pixel[2];samples+=1;}
+   const tone=`${Math.round(red/samples)};${Math.round(green/samples)};${Math.round(blue/samples)}`;
+   if(tone!==active){rendered+=`\x1b[38;2;${tone}m`;active=tone;}
+   rendered+='\u25cf ';
+  }
+  rows.push(rendered+C.reset);
+ }
+ return rows;
+}
+function compactPortrait(colorEnabled){
  const paint=(tone,value)=>colorEnabled?`${tone}${value}${C.reset}`:value;
- const r=value=>paint(C.crimson,value),dr=value=>paint(C.darkRed,value),w=value=>paint(C.white,value),g=value=>paint(C.gray,value);
- if(width<58)return[
-  `${dr('/////')}${w(' REMOTE RONIN ')}${dr('\\\\\\\\\\')}`,
-  `${g('   /_____')}${r('<0>')}${g('_____\\')}`,
-  `${g('  /_____/___\\_____\\')}`,
-  `${w(' REMOTE / OBSERVE / CONTROL')}`
- ];
  return[
-  `${dr('                 .-================-.')}`,
-  `${dr('             .-========================-.')}`,
-  `${dr('          .-=======---..........---=======-.')}`,
-  `${dr('        .======--..                  ..--======.')}`,
-  `${dr('       /====--.       ')}${g('.--------.')}${dr('       .--====\\')}`,
-  `${dr('      /===--.       ')}${g('/ /######\\ \\')}${dr('       .--===\\')}`,
-  `${dr('     |===--        ')}${g('| |########| |')}${dr('        --===|')}`,
-  `${dr('     |===--       ')}${g('/############\\')}${dr('       --===|')}`,
-  `${dr('     |====--     ')}${g('|####')}${w('  ____  ')}${g('####|')}${dr('     --====|')}`,
-  `${dr('     |=====--    ')}${g('|### ')}${w('/ __ \\')}${g(' ###|')}${dr('    --=====|')}`,
-  `${dr('     |======--   ')}${g('|## ')}${w('< ')}${r('0  0')}${w(' >')}${g(' ##|')}${dr('   --======|')}`,
-  `${dr('      \\======--  ')}${g('|### ')}${w('\\____/')}${g(' ###|')}${dr('  --======/')}`,
-  `${dr('       \\======-- ')}${g('\\#####/\\#####/')}${dr(' --======/')}`,
-  `${dr('        `-======--')}${g('`----/  \\----`')}${dr('--======-`')}`,
-  `${dr('          `-=======--')}${g(' / /\\ \\ ')}${dr('--=======-`')}`,
-  `${dr('             `--=====')}${g('/_/  \\_\\')}${dr('=====--`')}`,
-  `${r('           //// ')}${w('R E M O T E   R O N I N')}${r(' \\\\\\')}`,
-  `${g('              REMOTE / OBSERVE / CONTROL')}`
+  `${paint(C.darkRed,'/////')}${paint(C.white,' REMOTE RONIN ')}${paint(C.darkRed,'\\\\\\')}`,
+  `${paint(C.gray,'   /_____')}${paint(C.crimson,'<0>')}${paint(C.gray,'_____\\')}`,
+  `${paint(C.gray,'  /_____/___\\_____\\')}`,
+  `${paint(C.white,' REMOTE / OBSERVE / CONTROL')}`
  ];
 }
-async function renderBanner(){
- const width=Math.min(process.stdout.columns||80,100),innerWidth=Math.max(38,width-2),line='-'.repeat(innerWidth);
- console.clear();
- console.log(`${C.gold}+${line}+${C.reset}`);
- console.log(`${C.gold}|${C.bold}${'REMOTE RONIN'.padStart((innerWidth+12)/2).padEnd(innerWidth)}${C.reset}${C.gold}|${C.reset}`);
- console.log(`${C.gold}|${C.muted}${'Remote Developer Command Center'.padStart((innerWidth+31)/2).padEnd(innerWidth)}${C.reset}${C.gold}|${C.reset}`);
- console.log(`${C.gold}|${'Built by Aryan Seth'.padStart((innerWidth+19)/2).padEnd(innerWidth)}|${C.reset}`);
- console.log(`${C.gold}+${line}+${C.reset}`);
- const config=await load();
- if(config.showArtwork!==false){console.log('');for(const artLine of adaptivePortrait(width))console.log(centerLine(artLine,width));}
- console.log(`${C.muted}\n TERMINAL  TOOLS  PROJECTS  REMOTE  CHANGES  LOGS  SETTINGS${C.reset}\n`);
+function artworkLines(columns,availableRows,colorEnabled){
+ if(availableRows<4)return[];
+ if(!colorEnabled||columns<64){const compact=compactPortrait(colorEnabled);return availableRows>=compact.length?compact.map(line=>centerLine(line,columns)):[];}
+ const maxColumns=Math.max(6,Math.floor((columns-4)/2));
+ const scale=Math.min(availableRows/portraitShape.rows,maxColumns/portraitShape.columns,1);
+ const targetRows=Math.floor(portraitShape.rows*scale);
+ const targetColumns=Math.min(maxColumns,Math.max(4,Math.round(portraitShape.columns*scale)));
+ if(targetRows<10||targetColumns<4)return[];
+ return scaledPortrait(targetRows,targetColumns).map(line=>centerLine(line,columns));
 }
+export function startupLines({columns=100,rows=40,tools=[],showArtwork=true,color=true}={}){
+ const width=Math.max(30,Math.min(columns,100)),inner=width-2,leftPad=' '.repeat(Math.max(0,Math.floor((columns-width)/2)));
+ const gold=color?C.gold:'',muted=color?C.muted:'',bold=color?C.bold:'',reset=color?C.reset:'';
+ const centre=(text)=>{const value=text.length>inner?text.slice(0,inner):text;const before=Math.max(0,Math.floor((inner-value.length)/2));return ' '.repeat(before)+value+' '.repeat(Math.max(0,inner-value.length-before));};
+ const lines=[leftPad+gold+'+'+'-'.repeat(inner)+'+'+reset,leftPad+gold+'|'+bold+centre('REMOTE RONIN')+reset+gold+'|'+reset,leftPad+gold+'|'+muted+centre('Remote Developer Command Center')+reset+gold+'|'+reset,leftPad+gold+'|'+centre('Built by Aryan Seth')+'|'+reset,leftPad+gold+'+'+'-'.repeat(inner)+'+'+reset];
+ const tight=rows<36;
+ const gap=()=>{if(!tight)lines.push('');};
+ const clip=(text)=>columns>2?text.slice(0,columns):text;
+ const availableRows=rows-(tight?9:14)-tools.length-1;
+ gap();
+ if(showArtwork!==false)lines.push(...artworkLines(columns,availableRows,color));
+ gap();
+ lines.push(muted+clip(' TERMINAL  TOOLS  PROJECTS  REMOTE  CHANGES  LOGS  SETTINGS')+reset);
+ gap();
+ lines.push(gold+bold+'AVAILABLE TOOLS'+reset);
+ for(const tool of tools)lines.push((color?(tool.healthy?C.green:C.gray):'')+clip((tool.installed?'[+]':'[-]')+' '+tool.name.padEnd(18)+' '+(tool.installed?tool.version:'NOT FOUND'))+reset);
+ gap();
+ lines.push(muted+clip('Real host detection / No simulated data / Type /help')+reset);
+ gap();
+ return lines;
+}
+async function renderBanner(tools){
+ const config=await load();
+ const {columns,rows}=terminalSize();
+ const colorEnabled=process.env.NO_COLOR===undefined;
+ console.clear();
+ for(const line of startupLines({columns,rows,tools,showArtwork:config.showArtwork!==false,color:colorEnabled}))console.log(line);
+}
+
 const ask=(rl,question)=>new Promise(resolve=>rl.question(question,answer=>resolve(answer.trim())));
 async function setupWizard(rl){
  console.log(`\n${C.bold}${C.gold}INSTALLATION MENU${C.reset}`);
@@ -173,11 +257,8 @@ async function setupWizard(rl){
 }
 async function interactive(){await banner();const tools=await detectTools();console.log(`${C.gold}${C.bold}AVAILABLE TOOLS${C.reset}`);for(const t of tools)console.log(`${t.healthy?C.green:C.gray}${t.installed?'●':'○'} ${t.name.padEnd(18)} ${t.installed?t.version:'NOT FOUND'}${C.reset}`);console.log(`\n${C.muted}Real host detection · No simulated data · Type /help${C.reset}\n`);const rl=readline.createInterface({input:process.stdin,output:process.stdout,terminal:true,historySize:100});const prompt=()=>rl.question(`${C.green}devremote@aryan:~$ ${C.reset}`,async raw=>{if(raw.trim()==='/exit'||raw.trim()==='exit'){rl.close();return;}if(raw.trim()==='/clear'||raw.trim()==='clear'){await banner();prompt();return;}try{const result=await execute(parseInput(raw));print(result);if(result.data?.setupWizard)await setupWizard(rl);}catch(e){print(out('PARSE ERROR',[item('ERROR',e.message)],false));}prompt();});rl.on('SIGINT',()=>rl.close());rl.on('close',()=>{console.log(`\n${C.muted}DevRemote session closed.${C.reset}`);});prompt();}
 async function modernInteractive(){
- await renderBanner();
  const tools=await detectTools();
- console.log(`${C.gold}${C.bold}AVAILABLE TOOLS${C.reset}`);
- for(const tool of tools)console.log(`${tool.healthy?C.green:C.gray}${tool.installed?'[+]':'[-]'} ${tool.name.padEnd(18)} ${tool.installed?tool.version:'NOT FOUND'}${C.reset}`);
- console.log(`\n${C.muted}Real host detection / No simulated data / Type /help${C.reset}\n`);
+ await renderBanner(tools);
  const rl=readline.createInterface({input:process.stdin,output:process.stdout,terminal:true,historySize:100});
  const prompt=()=>rl.question(`${C.green}ronin@aryan:~$ ${C.reset}`,async raw=>{
   if(raw.trim()==='/exit'||raw.trim()==='exit'){rl.close();return;}

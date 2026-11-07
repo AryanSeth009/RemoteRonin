@@ -13,6 +13,8 @@
 - Dependency-free core runtime so installation does not depend on a package registry.
 - Guided `/setup` menu with numbered selections, explicit approval, idempotent health checks, supported package-manager installs, and post-install guidance.
 - Terminal-native red/white/black shinobi startup artwork with a configurable on/off setting.
+- Visual README with real terminal screenshots and a step-by-step install walkthrough.
+- Viewport-fitted start screen: the shinobi portrait resamples to the terminal's real rows and columns so branding, artwork, menu, and tool list never scroll.
 
 ## Requires real-device validation
 
