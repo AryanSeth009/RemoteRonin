@@ -26,16 +26,16 @@ The core is a single Node.js file that imports **nothing outside the standard li
 
 | | |
 |---|---|
-| 🛰️ **Real host detection** | Reports installed tools, versions, the Chrome Remote Desktop host and service state. Missing tools stay `NOT FOUND` — nothing is simulated. |
-| 🥷 **Shinobi startup artwork** | A true-color dot-matrix portrait resampled to your terminal's real rows and columns, so the whole screen fits without scrolling. |
-| 🧰 **Guided installer** | `/setup` walks through required core, AI developer tools, browser verification, or everything — with explicit approval before anything downloads. |
-| 📁 **Project registry** | Register folders once, switch the active project, then inspect real Git status and diffs. |
-| 🌐 **Preview checks** | Time a URL, and optionally capture a Playwright screenshot with console and network errors. |
-| 🔐 **Nothing secret touches disk** | No PINs, tokens, cookies, or provider credentials are read, stored, or logged. |
+|  **Real host detection** | Reports installed tools, versions, the Chrome Remote Desktop host and service state. Missing tools stay `NOT FOUND` — nothing is simulated. |
+|  **Shinobi startup artwork** | A true-color dot-matrix portrait resampled to your terminal's real rows and columns, so the whole screen fits without scrolling. |
+|  **Guided installer** | `/setup` walks through required core, AI developer tools, browser verification, or everything — with explicit approval before anything downloads. |
+|  **Project registry** | Register folders once, switch the active project, then inspect real Git status and diffs. |
+|  **Preview checks** | Time a URL, and optionally capture a Playwright screenshot with console and network errors. |
+|  **Nothing secret touches disk** | No PINs, tokens, cookies, or provider credentials are read, stored, or logged. |
 
 ---
 
-## 🚀 Quick start
+##  Quick start
 
 ### 1. Check you have what you need
 
