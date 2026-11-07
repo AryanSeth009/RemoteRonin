@@ -1,0 +1,13 @@
+node_modules/
+dist/
+coverage/
+.tmp-library/
+.remoteronin/
+.devremote/
+screenshots/
+*.log
+.env
+.env.*
+!.env.example
+config/local.json
+config/projects.json
