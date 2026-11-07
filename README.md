@@ -119,7 +119,7 @@ npx playwright install chromium
 
 ---
 
-## 📸 Screenshots
+## Screenshots
 
 The hero image above is the real startup screen at 155 × 49 with a zoomed console font — not a mock. The portrait is resampled for that viewport, so nothing scrolls. Here is how the same screen adapts:
 
@@ -137,7 +137,7 @@ The hero image above is the real startup screen at 155 × 49 with a zoomed conso
 
 ---
 
-## ⌨️ Command reference
+## Command reference
 
 Every command works interactively (`/tools`) and, unless marked otherwise, non-interactively (`.\start.cmd tools`).
 
@@ -166,7 +166,7 @@ Every command works interactively (`/tools`) and, unless marked otherwise, non-i
 
 ---
 
-## ⚙️ How it works
+## How it works
 
 ```mermaid
 flowchart LR
@@ -207,7 +207,7 @@ Narrow (< 64 columns) or `NO_COLOR` terminals automatically fall back to a compa
 
 ---
 
-## 🗂️ Configuration and local data
+## Configuration and local data
 
 Everything user-specific lives outside the repository:
 
@@ -227,7 +227,7 @@ If `%APPDATA%` is read-only, RemoteRonin falls back to `.remoteronin\` inside th
 
 ---
 
-## 🩺 Troubleshooting
+## Troubleshooting
 
 | Symptom | Fix |
 |---|---|
@@ -242,7 +242,7 @@ If `%APPDATA%` is read-only, RemoteRonin falls back to `.remoteronin\` inside th
 
 ---
 
-## 🔐 Safety and privacy
+## Safety and privacy
 
 - **No credentials.** RemoteRonin never reads, stores, or logs remote-access PINs, tokens, cookies, or provider credentials.
 - **No secrets in logs.** Log lines pass through a redaction filter before they are written.
@@ -252,7 +252,7 @@ If `%APPDATA%` is read-only, RemoteRonin falls back to `.remoteronin\` inside th
 
 ---
 
-## 🛠️ Development
+## Development
 
 ```powershell
 npm run build     # node --check on the runtime
@@ -274,7 +274,7 @@ Known gaps that need real hardware: Chrome Remote Desktop sign-in from a separat
 
 ---
 
-## 📄 License
+## License
 
 [MIT](LICENSE) — built by **Aryan Seth**.
 
